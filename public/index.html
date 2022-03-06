@@ -8,12 +8,15 @@
             const ws = new WebSocket("wss://HOSTNAME/websockets");
 
             ws.addEventListener('message', function (event) {
+                const payload = JSON.parse(event.data)
+                if (payload.type === "ping") {
+                    return
+                }
                 let audio = new Audio('youve-got-mail-sound.mp3')
                 audio.play();
-
-                const msg = event.data
+                
                 let div = document.createElement('div')
-                div.innerHTML = '<div class="alert alert-success fade show" role="alert">' + msg + '</div>'
+                div.innerHTML = '<div class="alert alert-success fade show" role="alert">' + payload.message + '</div>'
                 document.getElementById("container").appendChild(div)
                 setTimeout(function () {
                     $('.alert').alert('close')

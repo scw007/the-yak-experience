@@ -23,6 +23,18 @@ const main = async () => {
         noServer: true,
         path: "/websockets",
     });
+    wss.on("connection", (ws) => {
+        let id = setInterval(function() {
+            ws.send(JSON.stringify({
+                type: "ping",
+                message: new Date()
+            }), function() {  })
+        }, 1000)
+
+        ws.on("close", function() {
+            clearInterval(id)
+        })
+    });
     const app = express();
     app.use(stringReplace({
         'HOSTNAME': hostname,
@@ -52,8 +64,13 @@ const main = async () => {
     await apiClient.eventSub.deleteAllSubscriptions()
 
     const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
-        msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
-        wss.clients.forEach(client => client.send(msg));
+        const msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
+        const payload = {
+            type: message,
+            message: msg
+        }
+        
+        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     });
 
     await listener.listen();
