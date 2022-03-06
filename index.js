@@ -29,9 +29,6 @@ const main = async () => {
 
     // setup ws server
     const wss = new WebSocket.Server({ port: 1234 });
-    wss.on('connection', async function connection(ws) {
-        wss.clients.forEach(client => client.send('ello'));
-    });
 
     // setup twitch api
     const logger = {
