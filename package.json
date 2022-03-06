@@ -1,0 +1,19 @@
+{
+  "name": "twitch2obs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@twurple/api": "^5.0.18",
+    "@twurple/auth": "^5.0.18",
+    "@twurple/eventsub": "^5.0.18",
+    "@twurple/eventsub-ngrok": "^5.0.18",
+    "express": "^4.17.3",
+    "obs-websocket-js": "^4.0.3"
+  }
+}
