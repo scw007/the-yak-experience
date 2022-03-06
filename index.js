@@ -4,6 +4,7 @@ const { DirectConnectionAdapter, EventSubListener } = require('@twurple/eventsub
 const { NgrokAdapter } = require('@twurple/eventsub-ngrok');
 // const OBSWebSocket = require('obs-websocket-js');
 const express = require('express');
+const { stringReplace } = require('string-replace-middleware');
 const WebSocket = require('ws');
 const path = require('path');
 
@@ -20,6 +21,9 @@ const main = async () => {
     // setup http and ws server
     const wss = new WebSocket.Server({ noServer: true });
     const app = express();
+    app.use(stringReplace({
+        'HOSTNAME': hostname,
+    }));
     app.use(express.static(path.join(__dirname, 'public')));
     const server = app.listen(port);
     server.on('upgrade', (request, socket, head) => {
@@ -38,7 +42,7 @@ const main = async () => {
     if (hostname !== "") {
         adapter = new NgrokAdapter();
     } else {
-        adapter = new EnvPortAdapter({ hostname });
+        adapter = new EnvPortAdapter({ hostName: "https://" + hostname });
     }
     const listener = new EventSubListener({ apiClient, adapter, secret: eventSubSecret, logger });
 

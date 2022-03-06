@@ -14,6 +14,7 @@
     "@twurple/eventsub": "^5.0.18",
     "@twurple/eventsub-ngrok": "^5.0.18",
     "express": "^4.17.3",
-    "obs-websocket-js": "^4.0.3"
+    "obs-websocket-js": "^4.0.3",
+    "string-replace-middleware": "^1.0.2"
   }
 }
