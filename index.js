@@ -29,19 +29,11 @@ const main = async () => {
 
     // setup ws server
     const wss = new WebSocket.Server({ port: 1234 });
-    wss.on('connection', function connection(ws) {
-        ws.on('message', function message(data) {
-            console.log(data)
-            wss.clients.forEach(function each(client) {
-                if (client !== ws && client.readyState === WebSocket.OPEN) {
-                    client.send(data)
-                }
-            });
-        });
+    wss.on('connection', async function connection(ws) {
+        wss.clients.forEach(client => client.send('ello'));
     });
 
     // setup twitch api
-    /*
     const logger = {
         minLevel: 'debug'
     }
@@ -52,25 +44,12 @@ const main = async () => {
 
     await apiClient.eventSub.deleteAllSubscriptions()
 
-    const onlineSubscription = await listener.subscribeToStreamOnlineEvents(userId, async e => {
-        console.log(`${e.broadcasterDisplayName} just went live!`);
-        // try {
-        //     await obs.send('SetCurrentScene', {
-        //         'scene-name': 'Scene 2'
-        //     })
-        // } catch (err) {
-        //     console.log(err)
-        // }
+    const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
+        msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
+        wss.clients.forEach(client => client.send(msg));
     });
-    const offlineSubscription = await listener.subscribeToStreamOfflineEvents(userId, e => {
-        console.log(`${e.broadcasterDisplayName} just went offline`);
-    });
-
-    let subscriptions = await apiClient.eventSub.getSubscriptions(userId)
-    console.log(subscriptions)
 
     await listener.listen();
-    */
 }
 
 main()

@@ -8,8 +8,13 @@
             const ws = new WebSocket("ws://localhost:1234");
 
             ws.addEventListener('message', function (event) {
+                let audio = new Audio('youve-got-mail-sound.mp3')
+                audio.play();
+
                 const msg = event.data
-                document.getElementById("message").innerHTML = '<div class="alert alert-success fade show" role="alert">' + msg + '</div>'
+                let div = document.createElement('div')
+                div.innerHTML = '<div class="alert alert-success fade show" role="alert">' + msg + '</div>'
+                document.getElementById("container").appendChild(div)
                 setTimeout(function () {
                     $('.alert').alert('close')
                 }, 5000);
@@ -22,8 +27,7 @@
         }
     </style>
     <body>
-        <div class="d-flex justify-content-center">
-            <div id="message"></div>
+        <div id="container" class="d-flex justify-content-center">
         </div>
 
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
