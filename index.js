@@ -19,7 +19,10 @@ const main = async () => {
     const hostname = process.env.HOSTNAME
     
     // setup http and ws server
-    const wss = new WebSocket.Server({ noServer: true });
+    const wss = new WebSocket.Server({ 
+        noServer: true,
+        path: "/websockets",
+    });
     const app = express();
     app.use(stringReplace({
         'HOSTNAME': hostname,
