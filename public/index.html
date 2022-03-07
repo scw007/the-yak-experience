@@ -12,26 +12,82 @@
                 if (payload.type === "ping") {
                     return
                 }
-                let audio = new Audio('youve-got-mail-sound.mp3')
-                audio.play();
-                
-                let div = document.createElement('div')
-                div.innerHTML = '<div class="alert alert-success fade show" role="alert">' + payload.message + '</div>'
-                document.getElementById("container").appendChild(div)
-                setTimeout(function () {
-                    $('.alert').alert('close')
-                }, 5000);
+                document.getElementById("container").innerHTML = ''
+
+                if (payload.type === "message") {
+                    let audio = new Audio('youve-got-mail-sound.mp3')
+                    audio.play();
+                    let div = document.createElement('div')
+                    div.innerHTML = '<div class="alert alert-success fade show" role="alert">' + payload.message + '</div>'
+                    document.getElementById("container").appendChild(div)
+                    setTimeout(function () {
+                        $('.alert').alert('close')
+                    }, 5000);
+                    return
+                }
+                if (payload.type === 'poll_begin') {
+                    let audio = new Audio('beep.wav')
+                    audio.play();
+
+                    let titlePoll = document.createElement('div')
+                    titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>'
+                    document.getElementById("container").appendChild(titlePoll)
+
+                    let choices = document.createElement('div')
+                    choices.innerHTML = '<div class="d-flex justify-content-center">'
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + '</div>'
+                    }
+                    choices.innerHTML += '</div>'
+                    return
+                }
+                if (payload.type === 'poll_in_progress') {
+                    let audio = new Audio('beep.wav')
+                    audio.play();
+
+                    let titlePoll = document.createElement('div')
+                    titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>'
+                    document.getElementById("container").appendChild(titlePoll)
+
+                    let choices = document.createElement('div')
+                    choices.innerHTML = '<div class="d-flex justify-content-center">'
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>'
+                    }
+                    choices.innerHTML += '</div>'
+                    return
+                }
+                if (payload.type === 'poll_end') {
+                    let audio = new Audio('beep.wav')
+                    audio.play();
+
+                    let titlePoll = document.createElement('div')
+                    titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>'
+                    document.getElementById("container").appendChild(titlePoll)
+
+                    let choices = document.createElement('div')
+                    choices.innerHTML = '<div class="d-flex justify-content-center">'
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>'
+                    }
+                    choices.innerHTML += '</div>'
+                    return
+                }
             });
         </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500&display=swap" rel="stylesheet">
     </head>
     <style>
         .alert {
             display: inline-block;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 2.5em;
         }
     </style>
     <body>
-        <div id="container" class="d-flex justify-content-center">
-        </div>
+        <div id="container"></div>
 
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>

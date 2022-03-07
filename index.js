@@ -63,13 +63,37 @@ const main = async () => {
 
     await apiClient.eventSub.deleteAllSubscriptions()
 
-    const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
-        const msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
-        const payload = {
-            type: 'message',
-            message: msg
-        }
+    // const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
+    //     const msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
+    //     const payload = {
+    //         type: 'message',
+    //         message: msg
+    //     }
         
+    //     wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+    // });
+    const pollBegin = await listener.subscribeToChannelPollBeginEvents(userId, e => {
+        const payload = {
+            type: 'poll_begin',
+            title: e.title,
+            choices: e.choices
+        }
+        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+    });
+    const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
+        const payload = {
+            type: 'poll_in_progress',
+            title: e.title,
+            choices: e.choices
+        }
+        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+    });
+    const pollEnd = await listener.subscribeToChannelPollEndEvents(userId, e => {
+        const payload = {
+            type: 'poll_end',
+            title: e.title,
+            choices: e.choices
+        }
         wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     });
 
