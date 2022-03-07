@@ -26,7 +26,7 @@ const main = async () => {
     wss.on("connection", (ws) => {
         let id = setInterval(function() {
             ws.send(JSON.stringify({
-                type: "ping",
+                type: 'ping',
                 message: new Date()
             }), function() {  })
         }, 1000)
@@ -66,7 +66,7 @@ const main = async () => {
     const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
         const msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
         const payload = {
-            type: message,
+            type: 'message',
             message: msg
         }
         
