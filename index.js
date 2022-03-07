@@ -76,24 +76,27 @@ const main = async () => {
         const payload = {
             type: 'poll_begin',
             title: e.title,
-            choices: e.choices
+            choices: e.choices()
         }
+        console.log(payload)
         wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     });
     const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
         const payload = {
             type: 'poll_in_progress',
             title: e.title,
-            choices: e.choices
+            choices: e.choices()
         }
+        console.log(payload)
         wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     });
     const pollEnd = await listener.subscribeToChannelPollEndEvents(userId, e => {
         const payload = {
             type: 'poll_end',
             title: e.title,
-            choices: e.choices
+            choices: e.choices()
         }
+        console.log(payload)
         wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     });
 
