@@ -73,31 +73,52 @@ const main = async () => {
     //     wss.clients.forEach(client => client.send(JSON.stringify(payload)));
     // });
     const pollBegin = await listener.subscribeToChannelPollBeginEvents(userId, e => {
-        const payload = {
+        let payload = {
             type: 'poll_begin',
             title: e.title,
-            choices: e.choices()
+            choices: []
         }
+        for (let i = 0; i < e.choices.length; i++) {
+            payload.choices.push({
+                title: e.choices[i].title,
+                votes: 0
+            })
+        }
+        payload = JSON.stringify(payload)
         console.log(payload)
-        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+        wss.clients.forEach(client => client.send(payload));
     });
     const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
-        const payload = {
+        let payload = {
             type: 'poll_in_progress',
             title: e.title,
-            choices: e.choices()
+            choices: []
         }
+        for (let i = 0; i < e.choices.length; i++) {
+            payload.choices.push({
+                title: e.choices[i].title,
+                votes: e.choices[i].totalVotes
+            })
+        }
+        payload = JSON.stringify(payload)
         console.log(payload)
-        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+        wss.clients.forEach(client => client.send(payload));
     });
     const pollEnd = await listener.subscribeToChannelPollEndEvents(userId, e => {
-        const payload = {
-            type: 'poll_end',
+        let payload = {
+            type: 'poll_in_progress',
             title: e.title,
-            choices: e.choices()
+            choices: []
         }
+        for (let i = 0; i < e.choices.length; i++) {
+            payload.choices.push({
+                title: e.choices[i].title,
+                votes: e.choices[i].totalVotes
+            })
+        }
+        payload = JSON.stringify(payload)
         console.log(payload)
-        wss.clients.forEach(client => client.send(JSON.stringify(payload)));
+        wss.clients.forEach(client => client.send(payload));
     });
 
     await listener.listen();
