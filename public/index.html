@@ -47,24 +47,48 @@
                     }, timeout);
                     return
                 }
-                <!-- if (payload.type === 'poll_in_progress') { -->
-                <!--     let audio = new Audio('beep.wav') -->
-                <!--     audio.play(); -->
-
-                <!--     let titlePoll = document.createElement('div') -->
-                <!--     titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>' -->
-                <!--     document.getElementById("container").appendChild(titlePoll) -->
-
-                <!--     let choices = document.createElement('div') -->
-                <!--     choices.innerHTML = '<div class="d-flex justify-content-center">' -->
-                <!--     for (let i = 0; i < payload.choices.length; i++) { -->
-                <!--         choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>' -->
-                <!--     } -->
-                <!--     choices.innerHTML += '</div>' -->
-                <!--     document.getElementById("container").appendChild(choices) -->
-                <!--     return -->
-                <!-- } -->
                 if (payload.type === 'poll_end') {
+                    let audio = new Audio('beep.wav')
+                    audio.play();
+
+                    let titlePoll = document.createElement('div')
+                    titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>'
+                    document.getElementById("container").appendChild(titlePoll)
+
+                    let choices = document.createElement('div')
+                    choices.innerHTML = '<div class="d-flex justify-content-center">'
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>'
+                    }
+                    choices.innerHTML += '</div>'
+                    document.getElementById("container").appendChild(choices)
+                    setTimeout(function () {
+                        $('.alert').alert('close')
+                    }, timeout);
+                    return
+                }
+                if (payload.type === 'prediction_begin') {
+                    let audio = new Audio('beep.wav')
+                    audio.play();
+
+                    let titlePoll = document.createElement('div')
+                    titlePoll.innerHTML = '<div class="d-flex justify-content-center"><div class="alert alert-primary fade show" role="alert">' + payload.title + '</div></div>'
+                    document.getElementById("container").appendChild(titlePoll)
+
+                    let choices = document.createElement('div')
+                    choices.innerHTML = '<div class="d-flex justify-content-center">'
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + '</div>'
+                    }
+                    choices.innerHTML += '</div>'
+                    document.getElementById("container").appendChild(choices)
+
+                    setTimeout(function () {
+                        $('.alert').alert('close')
+                    }, timeout);
+                    return
+                }
+                if (payload.type === 'prediction_lock' || payload.type === 'prediction_end') {
                     let audio = new Audio('beep.wav')
                     audio.play();
 

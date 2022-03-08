@@ -123,6 +123,54 @@ const main = async () => {
         wss.clients.forEach(client => client.send(payload));
     });
 
+    const predictionBegin = await listener.subscribeToChannelPredictionBeginEvents(userId, e => {
+        let payload = {
+            type: 'prediction_begin',
+            title: e.title,
+            choices: []
+        }
+        for (let i = 0; i < e.outcomes.length; i++) {
+            payload.choices.push({
+                title: e.outcomes[i].title,
+            })
+        }
+        payload = JSON.stringify(payload)
+        console.log(payload)
+        wss.clients.forEach(client => client.send(payload));
+    });
+    const predictionLock = await listener.subscribeToChannelPredictionLockEvents(userId, e => {
+        let payload = {
+            type: 'prediction_lock',
+            title: e.title,
+            choices: []
+        }
+        for (let i = 0; i < e.outcomes.length; i++) {
+            payload.choices.push({
+                title: e.outcomes[i].title,
+                votes: e.outcomes[i].channelPoints 
+            })
+        }
+        payload = JSON.stringify(payload)
+        console.log(payload)
+        wss.clients.forEach(client => client.send(payload));
+    });
+    const predictionEnd = await listener.subscribeToChannelPredictionEndEvents(userId, e => {
+        let payload = {
+            type: 'prediction_end',
+            title: e.title,
+            choices: []
+        }
+        for (let i = 0; i < e.outcomes.length; i++) {
+            payload.choices.push({
+                title: e.outcomes[i].title,
+                votes: e.outcomes[i].channelPoints 
+            })
+        }
+        payload = JSON.stringify(payload)
+        console.log(payload)
+        wss.clients.forEach(client => client.send(payload));
+    });
+
     await listener.listen();
 }
 
