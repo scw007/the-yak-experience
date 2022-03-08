@@ -17,6 +17,7 @@ const main = async () => {
     const eventSubSecret = process.env.EVENTSUB_SECRET
     const port = process.env.PORT
     const hostname = process.env.HOSTNAME
+    const protocol = process.env.PROTOCOL || "wss"
     
     // setup http and ws server
     const wss = new WebSocket.Server({ 
@@ -38,6 +39,7 @@ const main = async () => {
     const app = express();
     app.use(stringReplace({
         'HOSTNAME': hostname,
+        'PROTOCOL': protocol
     }));
     app.use(express.static(path.join(__dirname, 'public')));
     const server = app.listen(port);
@@ -88,25 +90,25 @@ const main = async () => {
         console.log(payload)
         wss.clients.forEach(client => client.send(payload));
     });
-    const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
-        let payload = {
-            type: 'poll_in_progress',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.choices.length; i++) {
-            payload.choices.push({
-                title: e.choices[i].title,
-                votes: e.choices[i].totalVotes
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
-    });
+    // const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
+    //     let payload = {
+    //         type: 'poll_in_progress',
+    //         title: e.title,
+    //         choices: []
+    //     }
+    //     for (let i = 0; i < e.choices.length; i++) {
+    //         payload.choices.push({
+    //             title: e.choices[i].title,
+    //             votes: e.choices[i].totalVotes
+    //         })
+    //     }
+    //     payload = JSON.stringify(payload)
+    //     console.log(payload)
+    //     wss.clients.forEach(client => client.send(payload));
+    // });
     const pollEnd = await listener.subscribeToChannelPollEndEvents(userId, e => {
         let payload = {
-            type: 'poll_in_progress',
+            type: 'poll_end',
             title: e.title,
             choices: []
         }
