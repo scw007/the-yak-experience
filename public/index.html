@@ -79,7 +79,7 @@
 
                 if (payload.type.includes('poll')) {
                     await sleep(pollTimeout)
-                } else if (paylod.type.includes('prediction')) {
+                } else if (payload.type.includes('prediction')) {
                     await sleep(predictionTimeout)
                 }
                 titlePoll.innerHTML = ''
