@@ -10,7 +10,8 @@
             }
 
             const ws = new WebSocket("PROTOCOL://HOSTNAME/websockets");
-            const timeout = 9000
+            const pollTimeout = 9000
+            const predictionTimeout = 5000
 
             const params = new Proxy(new URLSearchParams(window.location.search), {
               get: (searchParams, prop) => searchParams.get(prop),
@@ -36,29 +37,51 @@
                 document.getElementById("container").appendChild(titlePoll)
                 let choices = document.createElement('div')
                 choices.innerHTML = '<div class="d-flex justify-content-center">'
+
                 if (payload.type === 'poll_begin') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + '</div>'
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        choices.innerHTML += payload.choices[i].title
+                        choices.innerHTML += '</div>'
                     }
                 }
                 if (payload.type === 'poll_end') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>'
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
+                        choices.innerHTML += '</div>'
                     }
                 }
                 if (payload.type === 'prediction_begin') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + '</div>'
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        choices.innerHTML += payload.choices[i].title 
+                        choices.innerHTML += '</div>'
                     }
                 }
-                if (payload.type === 'prediction_lock' || payload.type === 'prediction_end') {
+                if (payload.type === 'prediction_lock') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">' + payload.choices[i].title + ':' + payload.choices[i].votes + '</div>'
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
+                        choices.innerHTML +=  '</div>'
                     }
                 }
+                if (payload.type === 'prediction_end') {
+                    for (let i = 0; i < payload.choices.length; i++) {
+                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
+                        choices.innerHTML += '</div>'
+                    }
+                }
+
                 choices.innerHTML += '</div>'
                 document.getElementById("container").appendChild(choices)
-                await sleep(timeout)
+
+                if (payload.type.includes('poll')) {
+                    await sleep(pollTimeout)
+                } else if (paylod.type.includes('prediction')) {
+                    await sleep(predictionTimeout)
+                }
                 titlePoll.innerHTML = ''
                 choices.innerHTML = ''
                 return
