@@ -2,6 +2,7 @@ const { ClientCredentialsAuthProvider } = require('@twurple/auth');
 const { ApiClient } = require('@twurple/api');
 const { DirectConnectionAdapter, EventSubListener } = require('@twurple/eventsub');
 const { NgrokAdapter } = require('@twurple/eventsub-ngrok');
+const NodeCache = require("node-cache");
 // const OBSWebSocket = require('obs-websocket-js');
 const express = require('express');
 const { stringReplace } = require('string-replace-middleware');
@@ -9,7 +10,11 @@ const WebSocket = require('ws');
 const path = require('path');
 
 
+
 const main = async () => {
+    // setup cache
+    const myCache = new NodeCache();
+
     // setup config and secrets
     const userId = process.env.USER_ID
     const clientId = process.env.CLIENT_ID 
@@ -18,6 +23,7 @@ const main = async () => {
     const port = process.env.PORT
     const hostname = process.env.HOSTNAME
     const protocol = process.env.PROTOCOL || "wss"
+    const ttl = process.env.TTL || 3600
     
     // setup http and ws server
     const wss = new WebSocket.Server({ 
@@ -65,110 +71,70 @@ const main = async () => {
 
     await apiClient.eventSub.deleteAllSubscriptions()
 
-    // const redemptionAdd = await listener.subscribeToChannelRedemptionAddEvents(userId, e => {
-    //     const msg = `${e.userDisplayName} just redeemed ${e.rewardTitle}! ${e.input}`
-    //     const payload = {
-    //         type: 'message',
-    //         message: msg
-    //     }
-        
-    //     wss.clients.forEach(client => client.send(JSON.stringify(payload)));
-    // });
+    const eventHandler = (type, e) => {
+        console.log(type, e.id)
+        // handle duplicate events
+        if (myCache.has(type+e.id)) {
+            return
+        }
+        myCache.set(type+e.id, type+e.id, ttl)
+
+        let payload = {
+            type: type,
+            title: e.title,
+            choices: []
+        }
+        if (!!e.choices) {
+            for (let i = 0; i < e.choices.length; i++) {
+                let obj = {
+                    title: e.choices[i].title,
+                }
+                switch (type) {
+                    case 'poll_end':
+                        obj.votes = e.choices[i].totalVotes;
+                        break;
+                } 
+                payload.choices.push(obj) 
+            }
+        } else if (!!e.outcomes) {
+            for (let i = 0; i < e.outcomes.length; i++) {
+                let obj = {
+                    title: e.outcomes[i].title,
+                }
+                switch (type) {
+                    case 'prediction_lock':
+                        obj.votes = e.outcomes[i].channelPoints;
+                        break;
+                    case 'prediction_end':
+                        obj.votes = e.outcomes[i].channelPoints;
+                        break;
+                }
+                payload.choices.push(obj) 
+            }
+        }
+        payload = JSON.stringify(payload)
+        console.log(payload)
+        wss.clients.forEach(client => client.send(payload));
+    }
+
     const pollBegin = await listener.subscribeToChannelPollBeginEvents(userId, e => {
-        let payload = {
-            type: 'poll_begin',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.choices.length; i++) {
-            payload.choices.push({
-                title: e.choices[i].title,
-                votes: 0
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
+        eventHandler('poll_begin', e)
     });
-    // const pollInProgress = await listener.subscribeToChannelPollProgressEvents(userId, e => {
-    //     let payload = {
-    //         type: 'poll_in_progress',
-    //         title: e.title,
-    //         choices: []
-    //     }
-    //     for (let i = 0; i < e.choices.length; i++) {
-    //         payload.choices.push({
-    //             title: e.choices[i].title,
-    //             votes: e.choices[i].totalVotes
-    //         })
-    //     }
-    //     payload = JSON.stringify(payload)
-    //     console.log(payload)
-    //     wss.clients.forEach(client => client.send(payload));
-    // });
+
     const pollEnd = await listener.subscribeToChannelPollEndEvents(userId, e => {
-        let payload = {
-            type: 'poll_end',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.choices.length; i++) {
-            payload.choices.push({
-                title: e.choices[i].title,
-                votes: e.choices[i].totalVotes
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
+        eventHandler('poll_end', e)
     });
 
     const predictionBegin = await listener.subscribeToChannelPredictionBeginEvents(userId, e => {
-        let payload = {
-            type: 'prediction_begin',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.outcomes.length; i++) {
-            payload.choices.push({
-                title: e.outcomes[i].title,
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
+        eventHandler('prediction_begin', e)
     });
+
     const predictionLock = await listener.subscribeToChannelPredictionLockEvents(userId, e => {
-        let payload = {
-            type: 'prediction_lock',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.outcomes.length; i++) {
-            payload.choices.push({
-                title: e.outcomes[i].title,
-                votes: e.outcomes[i].channelPoints 
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
+        eventHandler('prediction_lock', e)
     });
+
     const predictionEnd = await listener.subscribeToChannelPredictionEndEvents(userId, e => {
-        let payload = {
-            type: 'prediction_end',
-            title: e.title,
-            choices: []
-        }
-        for (let i = 0; i < e.outcomes.length; i++) {
-            payload.choices.push({
-                title: e.outcomes[i].title,
-                votes: e.outcomes[i].channelPoints 
-            })
-        }
-        payload = JSON.stringify(payload)
-        console.log(payload)
-        wss.clients.forEach(client => client.send(payload));
+        eventHandler('prediction_end', e)
     });
 
     await listener.listen();
