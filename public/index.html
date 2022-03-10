@@ -12,9 +12,17 @@
             const ws = new WebSocket("PROTOCOL://HOSTNAME/websockets");
             const timeout = 9000
 
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+              get: (searchParams, prop) => searchParams.get(prop),
+            });
+            let type = params.type;
+
             ws.addEventListener('message', async function (event) {
                 const payload = JSON.parse(event.data)
                 if (payload.type === "ping") {
+                    return
+                }
+                if (!payload.type.includes(type)) {
                     return
                 }
 
