@@ -18,6 +18,10 @@
             });
             let type = params.type;
 
+            ws.addEventListener('open', function (event) {
+                console.log("connected!")
+            });
+
             ws.addEventListener('message', async function (event) {
                 const payload = JSON.parse(event.data)
                 if (payload.type === "ping") {
@@ -26,6 +30,7 @@
                 if (!payload.type.includes(type)) {
                     return
                 }
+                console.log(payload)
 
                 document.getElementById("container").innerHTML = ''
 
@@ -40,37 +45,50 @@
 
                 if (payload.type === 'poll_begin') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
-                        choices.innerHTML += payload.choices[i].title
-                        choices.innerHTML += '</div>'
+                        let str = '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        str += payload.choices[i].title
+                        str += '</div>'
+                        choices.innerHTML += str;
                     }
                 }
                 if (payload.type === 'poll_end') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
-                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
-                        choices.innerHTML += '</div>'
+                        let str = '<div class="m-2 alert '
+                        str += 'alert-primary '
+                        str += 'fade show" role="alert">'
+                        str += payload.choices[i].title + ':' + payload.choices[i].votes
+                        str += '</div>'
+                        choices.innerHTML += str;
                     }
                 }
                 if (payload.type === 'prediction_begin') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
-                        choices.innerHTML += payload.choices[i].title 
-                        choices.innerHTML += '</div>'
+                        let str = '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        str += payload.choices[i].title 
+                        str += '</div>'
+                        choices.innerHTML += str;
                     }
                 }
                 if (payload.type === 'prediction_lock') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
-                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
-                        choices.innerHTML +=  '</div>'
+                        let str = '<div class="m-2 alert alert-primary fade show" role="alert">'
+                        str += payload.choices[i].title + ':' + payload.choices[i].votes
+                        str += '</div>'
+                        choices.innerHTML += str;
                     }
                 }
                 if (payload.type === 'prediction_end') {
                     for (let i = 0; i < payload.choices.length; i++) {
-                        choices.innerHTML += '<div class="m-2 alert alert-primary fade show" role="alert">'
-                        choices.innerHTML += payload.choices[i].title + ':' + payload.choices[i].votes
-                        choices.innerHTML += '</div>'
+                        let str = '<div class="m-2 alert '
+                        if (payload.winner === payload.choices[i].title) {
+                            str += 'alert-success '
+                        } else {
+                            str += 'alert-primary '
+                        }
+                        str += 'fade show" role="alert">'
+                        str += payload.choices[i].title + ':' + payload.choices[i].votes
+                        str += '</div>'
+                        choices.innerHTML += str;
                     }
                 }
 
@@ -82,10 +100,9 @@
                 } else if (payload.type.includes('prediction')) {
                     await sleep(predictionTimeout)
                 }
-                titlePoll.innerHTML = ''
-                choices.innerHTML = ''
+                document.getElementById("container").innerHTML = ''
                 return
-            }, 1000);
+            });
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

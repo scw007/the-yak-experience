@@ -84,6 +84,9 @@ const main = async () => {
             title: e.title,
             choices: []
         }
+        if (!!e.winningOutcome) {
+            payload.winner = e.winningOutcome.title;
+        }
         if (!!e.choices) {
             for (let i = 0; i < e.choices.length; i++) {
                 let obj = {
